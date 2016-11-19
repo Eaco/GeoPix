@@ -137,10 +137,10 @@ public class MainCamera extends AppCompatActivity {
                 //TODO make this async
                 uploadPicture(data);
                 Log.d("LocationManager", "lat: " + lat + ", lon: " + lon);
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
-                fos.flush();
-                fos.close();
+//                FileOutputStream fos = new FileOutputStream(pictureFile);
+//                fos.write(data);
+//                fos.flush();
+//                fos.close();
             } catch (FileNotFoundException e) {
                 Log.d("cam", "File not found: " + e.getMessage());
             } catch (IOException e) {

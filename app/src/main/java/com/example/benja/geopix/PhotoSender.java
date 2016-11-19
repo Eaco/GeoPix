@@ -1,5 +1,7 @@
 package com.example.benja.geopix;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -9,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -39,6 +42,16 @@ public class PhotoSender extends AsyncTask {
             httpUrlConnection.setRequestProperty(
                     "Content-Type", "multipart/form-data;boundary=" + boundary);
 
+            byte[] imgData = (byte[])params[0];
+            Bitmap bm = BitmapFactory.decodeByteArray(imgData, 0, imgData.length);
+
+            OutputStream os = httpUrlConnection.getOutputStream();
+
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.flush();
+            os.close();
+
+            /*
             DataOutputStream request = new DataOutputStream(
                     httpUrlConnection.getOutputStream());
 
@@ -57,6 +70,7 @@ public class PhotoSender extends AsyncTask {
             Log.d("Request being sent", request.toString());
             request.flush();
             request.close();
+            */
             InputStream responseStream = new
                     BufferedInputStream(httpUrlConnection.getInputStream());
 
@@ -77,8 +91,6 @@ public class PhotoSender extends AsyncTask {
 
             responseStream.close();
             httpUrlConnection.disconnect();
-
-
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
