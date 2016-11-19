@@ -5,56 +5,66 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
-import java.io.DataOutputStream;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MainCamera extends AppCompatActivity {
 
     LocationManager locationManager;
+    PixLocationListener locationListener;
+    private double lat;
+    private double lon;
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
         //Remove title bar and initialize view
         setContentView(R.layout.activity_camera);
 
         Context context = getApplicationContext();
+
+        getPermissions(context);
+
+        Camera mCamera = getCameraInstance();
+
+        CameraPreview mPreview = new CameraPreview(this, mCamera);
+        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
+
+        locationListener = new PixLocationListener();
+
+        setupCaptureButton(mCamera);
+        setupMapButton(context);
+        //if it makes it this far the device has a camera
+    }
+
+    private void getPermissions(Context context) {
         if (!checkCameraHardware(context)) {
             System.exit(0);
-        }
-        File file = new File(context.getFilesDir(), "testfile");
-
-        String string = "test";
-        try {
-            FileOutputStream outputStream = openFileOutput(file.getName(), Context.MODE_PRIVATE);
-            outputStream.write(string.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA);
@@ -68,26 +78,13 @@ public class MainCamera extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
 
-
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
         }
-
-        Camera mCamera = getCameraInstance();
-
-        CameraPreview mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-
-        setupCaptureButton(mCamera);
-        setupMapButton(context);
-        //if it makes it this far the device has a camera
-
-
     }
 
     private void setupCaptureButton(final Camera mCamera) {
-        Button captureButton = (Button) findViewById(R.id.button_capture);
+        FloatingActionButton captureButton = (FloatingActionButton) findViewById(R.id.fab_pic);
         captureButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -104,7 +101,7 @@ public class MainCamera extends AppCompatActivity {
     }
 
     private void setupMapButton(final Context mContext) {
-        Button mapButton = (Button) findViewById(R.id.button_map);
+        FloatingActionButton mapButton = (FloatingActionButton) findViewById(R.id.fab_map);
         mapButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -138,9 +135,7 @@ public class MainCamera extends AppCompatActivity {
 
             try {
                 //TODO make this async
-                double lat = getLocation().getLatitude();
-                double lon = getLocation().getLongitude();
-//                uploadPicture(data);
+                uploadPicture(data);
                 Log.d("LocationManager", "lat: " + lat + ", lon: " + lon);
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(data);
@@ -157,53 +152,31 @@ public class MainCamera extends AppCompatActivity {
     };
 
     private void uploadPicture(byte[] pixels) throws IOException {
-        Location currentLocation = getLocation();
-        String attachmentName = "jpeg";
-        String attachmentFileName = "jpeg.jpeg";
-        String crlf = "\r\n";
-        String twoHyphens = "--";
-        String boundary = "*****";
-
-        HttpURLConnection httpUrlConnection = null;
-        URL url = new URL("http://example.com/server.cgi");
-        httpUrlConnection = (HttpURLConnection) url.openConnection();
-        httpUrlConnection.setUseCaches(false);
-        httpUrlConnection.setDoOutput(true);
-
-        httpUrlConnection.setRequestMethod("POST");
-        httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
-        httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
-        httpUrlConnection.setRequestProperty(
-                "Content-Type", "multipart/form-data;boundary=" + boundary);
-
-        DataOutputStream request = new DataOutputStream(
-                httpUrlConnection.getOutputStream());
-
-        request.writeBytes(twoHyphens + boundary + crlf);
-        request.writeBytes("Content-Disposition: form-data; name=\"" +
-                attachmentName + "\";filename=\"" +
-                attachmentFileName + "\"" + crlf);
-        request.writeBytes(crlf);
-        request.write(pixels);
-
-
-        request.writeBytes(crlf);
-        request.writeBytes(twoHyphens + boundary +
-                twoHyphens + crlf);
-
-        request.flush();
-        request.close();
+        Object[] params = {pixels, lat, lon};
+        new PhotoSender().execute(params);
     }
 
-    private Location getLocation() {
+    private void getLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return null;
+            return;
         }
-        return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        Criteria criteria = new Criteria();
+        String bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        if (location != null) {
+            lat = location.getLatitude();
+            lon = location.getLongitude();
+        } else {
+            locationManager.requestLocationUpdates(bestProvider, 1000, 0, locationListener);
+        }
     }
+
 
     private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             // this device has a camera
             return true;
         } else {
@@ -212,14 +185,15 @@ public class MainCamera extends AppCompatActivity {
         }
     }
 
-    /** A safe way to get an instance of the Camera object. */
-    public static Camera getCameraInstance(){
+    /**
+     * A safe way to get an instance of the Camera object.
+     */
+    public static Camera getCameraInstance() {
         Camera c = null;
 
         try {
             c = Camera.open(); // attempt to get a Camera instance
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             // Camera is not available (in use or does not exist)
             Log.d("Main", "CAMERA GONE BAE");
         }
@@ -229,13 +203,17 @@ public class MainCamera extends AppCompatActivity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
-    /** Create a file Uri for saving an image or video */
-    private static Uri getOutputMediaFileUri(int type){
+    /**
+     * Create a file Uri for saving an image or video
+     */
+    private static Uri getOutputMediaFileUri(int type) {
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-    /** Create a File for saving an image or video */
-    private static File getOutputMediaFile(int type){
+    /**
+     * Create a File for saving an image or video
+     */
+    private static File getOutputMediaFile(int type) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
@@ -248,8 +226,8 @@ public class MainCamera extends AppCompatActivity {
         // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
                 Log.d("MyCameraApp", "failed to create directory");
                 return null;
             }
@@ -258,12 +236,12 @@ public class MainCamera extends AppCompatActivity {
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
+        if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_DANK_"+ timeStamp + ".jpg");
-        } else if(type == MEDIA_TYPE_VIDEO) {
+                    "IMG_DANK_" + timeStamp + ".jpg");
+        } else if (type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
+                    "VID_" + timeStamp + ".mp4");
         } else {
             return null;
         }
