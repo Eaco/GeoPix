@@ -26,6 +26,14 @@
             android:layout_gravity="center_horizontal|bottom"
             android:layout_margin="@dimen/fab_margin"
             android:src="@android:drawable/ic_menu_camera"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_selfie"
+            android:layout_width="70dp"
+            android:layout_height="79dp"
+            android:layout_gravity="left|bottom"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@android:drawable/ic_menu_rotate"/>
     </FrameLayout>
 
     <LinearLayout

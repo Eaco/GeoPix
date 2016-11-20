@@ -17,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.google.android.gms.appindexing.Action;
@@ -37,6 +38,7 @@ public class MainCamera extends AppCompatActivity {
     private double lat;
     private double lon;
     private GoogleApiClient client;
+    private boolean selfieCam = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,17 +51,37 @@ public class MainCamera extends AppCompatActivity {
 
         getPermissions(context);
 
-        Camera mCamera = getCameraInstance();
-
-        CameraPreview mPreview = new CameraPreview(this, mCamera);
+        Camera backCamera = getCameraInstance(true);
+        Camera frontCamera = getCameraInstance(false);
+        CameraPreview backPreView = new CameraPreview(this, backCamera);
+        CameraPreview frontPreView = new CameraPreview(this, frontCamera);
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
+        preview.addView(backPreView);
 
         locationListener = new PixLocationListener();
 
-        setupCaptureButton(mCamera);
+        setupCaptureButton(backCamera, frontCamera);
         setupMapButton(context);
-        //if it makes it this far the device has a camera
+        setupSelfieButton(preview, backPreView, frontPreView);
+    }
+
+    private void setupSelfieButton(final FrameLayout preview, final CameraPreview back, final CameraPreview front) {
+        FloatingActionButton selfie = (FloatingActionButton)findViewById(R.id.fab_selfie);
+        selfie.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (!selfieCam){
+                            preview.removeView(back);
+                            preview.addView(front);
+                        }
+                        else {
+                            preview.removeView(front);
+                            preview.addView(back);
+                        }
+                        selfieCam = !selfieCam;
+                    }
+                });
     }
 
     private void getPermissions(Context context) {
@@ -83,7 +105,7 @@ public class MainCamera extends AppCompatActivity {
         }
     }
 
-    private void setupCaptureButton(final Camera mCamera) {
+    private void setupCaptureButton(final Camera backCamera, final Camera frontCamera) {
         FloatingActionButton captureButton = (FloatingActionButton) findViewById(R.id.fab_pic);
         captureButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -92,7 +114,12 @@ public class MainCamera extends AppCompatActivity {
                         // get an image from the camera
                         try {
                             Log.d("sertupCaptureButton", "Taking Photo");
-                            mCamera.takePicture(null, null, mPicture);
+                            if(!selfieCam) {
+                                backCamera.takePicture(null, null, mPicture);
+                            }
+                            else {
+                                frontCamera.takePicture(null, null, mPicture);
+                            }
                         } catch (Exception e) {
                             Log.d("something", "else");
                         }
@@ -188,17 +215,43 @@ public class MainCamera extends AppCompatActivity {
     /**
      * A safe way to get an instance of the Camera object.
      */
-    public static Camera getCameraInstance() {
+    public static Camera getCameraInstance(boolean backFacing) {
         Camera c = null;
 
         try {
-            c = Camera.open(); // attempt to get a Camera instance
+            if (backFacing){
+                c = Camera.open(); // attempt to get a Camera instance
+            }
+            else {
+                int id = findFrontFacingCamera();
+                c = Camera.open(id);
+            }
         } catch (Exception e) {
             // Camera is not available (in use or does not exist)
             Log.d("Main", "CAMERA GONE BAE");
         }
         return c; // returns null if camera is unavailable
     }
+
+    /**
+     * This should help us find the front facing camera
+     */
+    private static int findFrontFacingCamera() {
+        int cameraId = -1;
+        // Search for the front facing camera
+        int numberOfCameras = Camera.getNumberOfCameras();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.CameraInfo info = new Camera.CameraInfo();
+            Camera.getCameraInfo(i, info);
+            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                Log.d("Camera", "Camera found");
+                cameraId = i;
+                break;
+            }
+        }
+        return cameraId;
+    }
+
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
