@@ -35,6 +35,8 @@ public class PhotoSender extends AsyncTask {
 
             HttpURLConnection httpUrlConnection = null;
             URL url = new URL("http://192.168.42.127:3002/images");
+//            URL url = new URL("http://geopix-bengineering.rhcloud.com/images");
+
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
