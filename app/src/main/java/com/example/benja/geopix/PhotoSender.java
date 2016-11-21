@@ -2,16 +2,19 @@ package com.example.benja.geopix;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -31,7 +34,7 @@ public class PhotoSender extends AsyncTask {
             String boundary = "*****";
 
             HttpURLConnection httpUrlConnection = null;
-            URL url = new URL("http://192.168.42.127:8080/images");
+            URL url = new URL("http://192.168.42.127:3002/images");
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
@@ -42,35 +45,19 @@ public class PhotoSender extends AsyncTask {
             httpUrlConnection.setRequestProperty(
                     "Content-Type", "multipart/form-data;boundary=" + boundary);
 
+
             byte[] imgData = (byte[])params[0];
             Bitmap bm = BitmapFactory.decodeByteArray(imgData, 0, imgData.length);
 
             OutputStream os = httpUrlConnection.getOutputStream();
 
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+
             bm.compress(Bitmap.CompressFormat.JPEG, 100, os);
             os.flush();
             os.close();
 
-            /*
-            DataOutputStream request = new DataOutputStream(
-                    httpUrlConnection.getOutputStream());
-
-            request.writeBytes(twoHyphens + boundary + crlf);
-            request.writeBytes("Content-Disposition: form-data; name=\"" +
-                    attachmentName + "\";filename=\"" +
-                    attachmentFileName + "\"" + crlf);
-            request.writeBytes(crlf);
-            request.write((byte[]) params[0]);
-
-
-            request.writeBytes(crlf);
-            request.writeBytes(twoHyphens + boundary +
-                    twoHyphens + crlf);
-
-            Log.d("Request being sent", request.toString());
-            request.flush();
-            request.close();
-            */
             InputStream responseStream = new
                     BufferedInputStream(httpUrlConnection.getInputStream());
 

@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 
 public class DisplayImageActivity extends Activity {
@@ -20,6 +21,16 @@ public class DisplayImageActivity extends Activity {
         self = this;
 
         ImageView displayImageView = (ImageView)findViewById(R.id.display_activity_image);
+
+        RatingBar ratingBar = (RatingBar) findViewById(R.id.rate_image);
+
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                Object[] params = {};
+                new RatingSender().execute(params);
+            }
+        });
 
         Intent intent = getIntent();
         Uri imageUri = intent.getParcelableExtra("ImageUri");

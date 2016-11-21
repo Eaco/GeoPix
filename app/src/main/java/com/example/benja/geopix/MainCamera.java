@@ -45,6 +45,7 @@ public class MainCamera extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         //Remove title bar and initialize view
+
         setContentView(R.layout.activity_camera);
 
         Context context = getApplicationContext();
