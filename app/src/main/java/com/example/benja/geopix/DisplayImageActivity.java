@@ -23,19 +23,21 @@ public class DisplayImageActivity extends Activity {
         ImageView displayImageView = (ImageView)findViewById(R.id.display_activity_image);
 
         RatingBar ratingBar = (RatingBar) findViewById(R.id.rate_image);
+        Intent intent = getIntent();
+
+        final String id = intent.getStringExtra("imageId");
 
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                Object[] params = {rating};
+                Object[] params = {rating, id};
                 new RatingSender().execute(params);
             }
         });
 
-        Intent intent = getIntent();
         Uri imageUri = intent.getParcelableExtra("ImageUri");
         new ImageUriLoader(displayImageView).loadFromUri(imageUri);
-
+        displayImageView.setRotation(90);
         RelativeLayout layout = (RelativeLayout)findViewById(R.id.display_activity_layout);
         layout.setOnClickListener(new CloseOnClickListener());
     }

@@ -80,14 +80,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         mMap.setOnMarkerClickListener(new PhotoMarkerClickListener());
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lon), 15));
         // Add a marker in Sydney and move the camera
-        LatLng slc = new LatLng(43.471991, -80.544769);
-        LatLng e2 = new LatLng(43.471423, -80.538965);
-        LatLng pac = new LatLng(43.471532, -80.546883);
 
-        makeMarker(slc, "squirtle");
-        makeMarker(e2, "charmander");
-        makeMarker(pac, "bulbasaur");
     }
 
     private void makeMarker(LatLng latLng, String title){
@@ -96,9 +91,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private class PhotoMarkerClickListener implements GoogleMap.OnMarkerClickListener {
-        public boolean onMarkerClick(Marker marker){
+        public boolean onMarkerClick(Marker marker) {
             Log.d("MARKOTAG", "SOMEONE CLICKED ON A MARKER! THE MESSAGE IS: " + marker.getTitle());
             Intent startIntent = new Intent(mContext, DisplayImageActivity.class);
+            startIntent.putExtra("imageId", marker.getTitle());
             startIntent.putExtra("ImageUri", Uri.parse("https://geopix-bengineering.rhcloud.com/images/" + marker.getTitle()));
 //            startIntent.putExtra("uniqueID", marker.getTitle());
             mContext.startActivity(startIntent);

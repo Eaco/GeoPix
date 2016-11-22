@@ -39,6 +39,7 @@ public class MainCamera extends AppCompatActivity {
     private double lon;
     private GoogleApiClient client;
     private boolean selfieCam = false;
+    private String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,8 @@ public class MainCamera extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        Intent intent = getIntent();
+        user = intent.getStringExtra("user");
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, new PixLocationListener());
         //Remove title bar and initialize view
 
@@ -58,8 +61,9 @@ public class MainCamera extends AppCompatActivity {
 
         Camera backCamera = getCameraInstance(true);
         Camera frontCamera = getCameraInstance(false);
-        CameraPreview backPreView = new CameraPreview(this, backCamera);
-        CameraPreview frontPreView = new CameraPreview(this, frontCamera);
+        CameraPreview backPreView = new CameraPreview(this, backCamera, false);
+        CameraPreview frontPreView = new CameraPreview(this, frontCamera, true
+        );
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(backPreView);
 
@@ -185,7 +189,7 @@ public class MainCamera extends AppCompatActivity {
     };
 
     private void uploadPicture(byte[] pixels) throws IOException {
-        Object[] params = {pixels, lat, lon};
+        Object[] params = {pixels, lat, lon, user};
         new PhotoSender().execute(params);
     }
 

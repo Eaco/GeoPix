@@ -73,11 +73,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
+
             Log.d("signintoken", acct.getIdToken());
 
             try {
                 Intent startIntent = new Intent(getApplicationContext(), MainCamera.class);
                 finishAffinity();
+                startIntent.putExtra("user", acct.getId());
                 getApplicationContext().startActivity(startIntent);
             } catch (Exception e) {
                 Log.d("signin", "MainCamera failed to launch");

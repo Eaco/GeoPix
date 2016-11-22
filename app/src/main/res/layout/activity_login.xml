@@ -14,20 +14,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Please sign in!"
-        android:layout_centerHorizontal="true"/>
-
-    <TextView
         android:id="@+id/auth_status_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Test"
-        android:layout_marginTop="25dp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true" />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="123dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/app_name"
+        android:id="@+id/textView"
+        android:textStyle="bold"
+        android:textSize="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="104dp" />
 </RelativeLayout>

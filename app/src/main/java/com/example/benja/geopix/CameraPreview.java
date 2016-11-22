@@ -12,10 +12,12 @@ import java.io.IOException;
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
+    private Boolean front;
 
-    public CameraPreview(Context context, Camera camera) {
+    public CameraPreview(Context context, Camera camera, Boolean front) {
         super(context);
         mCamera = camera;
+        this.front = front;
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -29,7 +31,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // The Surface has been created, now tell the camera where to draw the preview.
         try {
             mCamera.setPreviewDisplay(holder);
-            mCamera.setDisplayOrientation(90);
+            if (front) {
+                mCamera.setDisplayOrientation(270);
+            }
+            else{
+                mCamera.setDisplayOrientation(90);
+            }
             mCamera.startPreview();
         } catch (IOException e) {
             Log.d("campreview", "Error setting camera preview: " + e.getMessage());
