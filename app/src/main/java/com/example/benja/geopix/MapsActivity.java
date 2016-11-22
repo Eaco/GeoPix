@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -126,8 +127,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 String response = stringBuilder.toString();
 
-                JSONObject jsonObj = new JSONObject(response);
-
+//                JSONObject jsonObj = new JSONObject(response);
+                JSONArray jsonArray = new JSONArray(response);
                 Log.d("PhotoSender Http Response", response);
 
                 responseStream.close();

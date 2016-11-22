@@ -77,7 +77,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
             try {
                 Intent startIntent = new Intent(getApplicationContext(), MainCamera.class);
-                startIntent.setFlags(startIntent.getFlags() | Intent.FLAG_ACTIVITY_NO_HISTORY); // Adds the FLAG_ACTIVITY_NO_HISTORY
+//                startIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Adds the FLAG_ACTIVITY_NO_HISTORY
+//                startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // Adds the FLAG_ACTIVITY_NO_HISTORY
+                finishAffinity();
                 getApplicationContext().startActivity(startIntent);
             } catch (Exception e) {
                 Log.d("signin", "MainCamera failed to launch");
