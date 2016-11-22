@@ -4,6 +4,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 
 /**
  * Created by benja on 11/19/2016.
@@ -16,6 +17,7 @@ public class PixLocationListener implements LocationListener {
         //Hey, a non null location! Sweet!
 
         //open the map:
+        Log.d("PixLocationListener", "onLocationChanged: " + lat + " " + lon);
         lat = location.getLatitude();
         lon = location.getLongitude();
     }

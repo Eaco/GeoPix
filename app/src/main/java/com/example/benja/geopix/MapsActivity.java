@@ -16,6 +16,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.net.HttpURLConnection;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     Context mContext;
@@ -45,6 +47,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        new PhotoGetter().execute(new Object[]{30, 40});
+        //httpget from server (GET /images)
+        //map JSON objects to points on map, no big deal yall
+
 
         mMap.setOnMarkerClickListener(new PhotoMarkerClickListener());
         // Add a marker in Sydney and move the camera

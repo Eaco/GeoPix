@@ -44,6 +44,10 @@ public class MainCamera extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, new PixLocationListener());
         //Remove title bar and initialize view
 
         setContentView(R.layout.activity_camera);
@@ -163,6 +167,7 @@ public class MainCamera extends AppCompatActivity {
 
             try {
                 //TODO make this async
+                getLocation();
                 uploadPicture(data);
                 Log.d("LocationManager", "lat: " + lat + ", lon: " + lon);
 //                FileOutputStream fos = new FileOutputStream(pictureFile);
