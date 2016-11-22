@@ -38,8 +38,8 @@ public class PhotoSender extends AsyncTask {
 
             HttpURLConnection httpUrlConnection = null;
 
-            URL url = new URL("http://192.168.42.127:3002/images");
-//            URL url = new URL("http://geopix-bengineering.rhcloud.com/ratings/101010101010101010101010");
+//            URL url = new URL("http://192.168.42.127:3002/images");
+            URL url = new URL("http://geopix-bengineering.rhcloud.com/images");
 
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
@@ -47,7 +47,7 @@ public class PhotoSender extends AsyncTask {
             httpUrlConnection.setRequestMethod("POST");
             httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
             httpUrlConnection.setRequestProperty("Content-Type", "application/json");
-            httpUrlConnection.setRequestProperty("Host", "android.schoolportal.gr");
+//            httpUrlConnection.setRequestProperty("Host", "android.schoolportal.gr");
             httpUrlConnection.connect();
 
             JSONObject jsonParam = new JSONObject();
@@ -86,9 +86,9 @@ public class PhotoSender extends AsyncTask {
 
             httpUrlConnection.disconnect();
 
-            url= new URL("http://192.168.42.127:3002/images/" + id);
             Log.d("PhotoSender", "doInBackground: Uploading image" + id);
-//            URL url = new URL("http://geopix-bengineering.rhcloud.com/images");
+//            url= new URL("http://192.168.42.127:3002/images/" + id);
+            url = new URL("http://geopix-bengineering.rhcloud.com/images/" + id);
 
             httpUrlConnection = (HttpURLConnection) url.openConnection();
             httpUrlConnection.setUseCaches(false);
