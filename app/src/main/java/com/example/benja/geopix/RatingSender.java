@@ -40,9 +40,8 @@ public class RatingSender extends AsyncTask {
             urlConn.setRequestProperty("Host", "android.schoolportal.gr");
             urlConn.connect();
 
-
             JSONObject jsonParam = new JSONObject();
-            jsonParam.put("rating", "5");
+            jsonParam.put("rating", params[0]);
 
             OutputStreamWriter out = new OutputStreamWriter(urlConn.getOutputStream());
             out.write(jsonParam.toString());

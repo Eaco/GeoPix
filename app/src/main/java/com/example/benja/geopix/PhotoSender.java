@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,7 +37,57 @@ public class PhotoSender extends AsyncTask {
             String boundary = "*****";
 
             HttpURLConnection httpUrlConnection = null;
+
             URL url = new URL("http://192.168.42.127:3002/images");
+//            URL url = new URL("http://geopix-bengineering.rhcloud.com/ratings/101010101010101010101010");
+
+            httpUrlConnection = (HttpURLConnection) url.openConnection();
+            httpUrlConnection.setUseCaches(false);
+            httpUrlConnection.setDoOutput(true);
+            httpUrlConnection.setRequestMethod("POST");
+            httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
+            httpUrlConnection.setRequestProperty("Content-Type", "application/json");
+            httpUrlConnection.setRequestProperty("Host", "android.schoolportal.gr");
+            httpUrlConnection.connect();
+
+            JSONObject jsonParam = new JSONObject();
+            jsonParam.put("latitude", params[1]);
+            jsonParam.put("longitude", params[2]);
+
+            OutputStreamWriter out = new OutputStreamWriter(httpUrlConnection.getOutputStream());
+            out.write(jsonParam.toString());
+            out.flush();
+            out.close();
+
+
+            InputStream responseStream = new
+                    BufferedInputStream(httpUrlConnection.getInputStream());
+
+            BufferedReader responseStreamReader =
+                    new BufferedReader(new InputStreamReader(responseStream));
+
+            String line = "";
+            StringBuilder stringBuilder = new StringBuilder();
+
+            while ((line = responseStreamReader.readLine()) != null) {
+                stringBuilder.append(line).append("\n");
+            }
+            responseStreamReader.close();
+
+            String response = stringBuilder.toString();
+
+            JSONObject jsonObj = new JSONObject(response);
+
+            String id = (String) jsonObj.get("_id");
+
+            Log.d("PhotoSender Http Response", response);
+
+            responseStream.close();
+
+            httpUrlConnection.disconnect();
+
+            url= new URL("http://192.168.42.127:3002/images/" + id);
+            Log.d("PhotoSender", "doInBackground: Uploading image" + id);
 //            URL url = new URL("http://geopix-bengineering.rhcloud.com/images");
 
             httpUrlConnection = (HttpURLConnection) url.openConnection();
@@ -60,25 +113,24 @@ public class PhotoSender extends AsyncTask {
             os.flush();
             os.close();
 
-            InputStream responseStream = new
+            responseStream = new
                     BufferedInputStream(httpUrlConnection.getInputStream());
 
-            BufferedReader responseStreamReader =
+            responseStreamReader =
                     new BufferedReader(new InputStreamReader(responseStream));
 
-            String line = "";
-            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder = new StringBuilder();
 
             while ((line = responseStreamReader.readLine()) != null) {
                 stringBuilder.append(line).append("\n");
             }
             responseStreamReader.close();
 
-            String response = stringBuilder.toString();
+            response = stringBuilder.toString();
 
-            Log.d("PhotoSender Http Response", response);
+            Log.d("Photosender", "doInBackground: " + response
+            );
 
-            responseStream.close();
             httpUrlConnection.disconnect();
 
         } catch (MalformedURLException e) {
@@ -86,6 +138,8 @@ public class PhotoSender extends AsyncTask {
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;

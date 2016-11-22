@@ -27,7 +27,7 @@ public class DisplayImageActivity extends Activity {
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                Object[] params = {};
+                Object[] params = {rating};
                 new RatingSender().execute(params);
             }
         });
