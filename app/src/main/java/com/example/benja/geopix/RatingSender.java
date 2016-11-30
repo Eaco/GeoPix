@@ -28,7 +28,7 @@ public class RatingSender extends AsyncTask {
             HttpURLConnection urlConn;
             DataOutputStream printout;
             DataInputStream input;
-//            URL url = new URL("http://192.168.42.127:3002/ratings/101010101010101010101010");
+//            URL url = new URL("http://192.168.42.127:3002/ratings/params[1]");
             URL url = new URL("http://geopix-bengineering.rhcloud.com/ratings/" + params[1]);
 
 

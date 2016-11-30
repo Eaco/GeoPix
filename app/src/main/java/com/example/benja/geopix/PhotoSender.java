@@ -2,6 +2,7 @@ package com.example.benja.geopix;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -42,6 +43,9 @@ public class PhotoSender extends AsyncTask {
             URL url = new URL("http://geopix-bengineering.rhcloud.com/images");
 
             httpUrlConnection = (HttpURLConnection) url.openConnection();
+            String basicAuth = "Bearer: " + params[3];
+            httpUrlConnection.setRequestProperty ("Authorization", basicAuth);
+
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
             httpUrlConnection.setRequestMethod("POST");
@@ -94,6 +98,7 @@ public class PhotoSender extends AsyncTask {
             httpUrlConnection.setUseCaches(false);
             httpUrlConnection.setDoOutput(true);
 
+            httpUrlConnection.setRequestProperty ("Authorization", basicAuth);
             httpUrlConnection.setRequestMethod("POST");
             httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
             httpUrlConnection.setRequestProperty("Cache-Control", "no-cache");
@@ -103,6 +108,11 @@ public class PhotoSender extends AsyncTask {
 
             byte[] imgData = (byte[])params[0];
             Bitmap bm = BitmapFactory.decodeByteArray(imgData, 0, imgData.length);
+
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
+
 
             OutputStream os = httpUrlConnection.getOutputStream();
 

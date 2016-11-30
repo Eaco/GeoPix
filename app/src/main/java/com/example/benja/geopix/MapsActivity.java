@@ -1,6 +1,9 @@
 package com.example.benja.geopix;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,10 +11,14 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.RatingBar;
 
 import com.example.benja.geopix.DisplayImageActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,8 +46,11 @@ import java.net.URL;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     Context mContext;
-    private GoogleMap mMap;
+    private static GoogleMap mMap;
+    private String idToken;
     LocationManager locationManager;
+    static int minRate = 0;
+    static double lon, lat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +58,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         mContext = this;
 
-
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+
+
+        FloatingActionButton filter = (FloatingActionButton) findViewById(R.id.fab_filter);
+        filter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RatingDialogFragment r = new RatingDialogFragment();
+
+                r.show(getFragmentManager(), "filter");
+            }
+        });
+        idToken = getIntent().getStringExtra("idToken");
+
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, new PixLocationListener());
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -73,9 +95,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        double lat = location.getLatitude();
-        double lon = location.getLongitude();
+        lat = location.getLatitude();
+        lon = location.getLongitude();
         new PhotoGetter().execute(new Object[]{lon, lat});
 
 
@@ -85,8 +108,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    private void makeMarker(LatLng latLng, String title){
+    private static void makeMarker(LatLng latLng, String title){
         mMap.addMarker(new MarkerOptions().position(latLng).title(title));
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
     }
 
@@ -96,6 +120,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Intent startIntent = new Intent(mContext, DisplayImageActivity.class);
             startIntent.putExtra("imageId", marker.getTitle());
             startIntent.putExtra("ImageUri", Uri.parse("https://geopix-bengineering.rhcloud.com/images/" + marker.getTitle()));
+//            startIntent.putExtra("ImageUri", Uri.parse("http://192.168.42.127:3002/images/" + marker.getTitle()));
 //            startIntent.putExtra("uniqueID", marker.getTitle());
             mContext.startActivity(startIntent);
             return true;
@@ -103,7 +128,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    public class PhotoGetter extends AsyncTask<Object, Void, JSONArray> {
+    public static class PhotoGetter extends AsyncTask<Object, Void, JSONArray> {
         @Override
         protected JSONArray doInBackground(Object... params) {
             try {
@@ -113,7 +138,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 //                URL url = new URL("http://192.168.42.127:3002/images?latitude=" + params[0] + "&longitude=" + params[1]);
                 URL url = new URL("http://geopix-bengineering.rhcloud.com/images?latitude=" + params[0] + "&longitude=" + params[1]);
-//            URL url = new URL("http://geopix-bengineering.rhcloud.com/ratings/101010101010101010101010");
 
                 httpUrlConnection = (HttpURLConnection) url.openConnection();
                 httpUrlConnection.setRequestMethod("GET");
@@ -164,16 +188,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (int i = 0; i < images.length(); i++) {
                     JSONObject j = images.getJSONObject(i);
                     JSONObject loc = j.getJSONObject("location");
+
                     JSONArray coordArray = (JSONArray) loc.get("coordinates");
 
                     LatLng coords = new LatLng(Double.parseDouble(coordArray.getString(0)), Double.parseDouble(coordArray.getString(1)));
                     String id = j.getString("_id");
-                    makeMarker(coords, id);
+
+                    if (j.getInt("rating") >= minRate){
+                        makeMarker(coords, id);
+                    }
+
                     Log.d("photofetcher", coordArray.get(0) + " " + coordArray.get(1));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+    public static class RatingDialogFragment extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            View tempview = inflater.inflate(R.layout.rating_filter, null);
+
+            RatingBar ratingBar = (RatingBar) tempview.findViewById(R.id.filter_rating);
+            if(ratingBar != null) {
+                ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                    @Override
+                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                        minRate = (int)rating;
+                        mMap.clear();
+                        new PhotoGetter().execute(new Object[]{lon, lat});
+                    }
+                });
+            }
+
+            builder.setView(tempview);
+            return builder.create();
         }
     }
 

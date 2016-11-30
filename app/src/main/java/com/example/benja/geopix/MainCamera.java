@@ -40,6 +40,7 @@ public class MainCamera extends AppCompatActivity {
     private GoogleApiClient client;
     private boolean selfieCam = false;
     private String user;
+    private String idToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class MainCamera extends AppCompatActivity {
         }
         Intent intent = getIntent();
         user = intent.getStringExtra("user");
+        idToken = intent.getStringExtra("signintoken");
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, new PixLocationListener());
         //Remove title bar and initialize view
 
@@ -145,6 +147,7 @@ public class MainCamera extends AppCompatActivity {
                         // get an image from the camera
                         try {
                             Intent startIntent = new Intent(mContext, MapsActivity.class);
+                            startIntent.putExtra("idToken", idToken);
                             mContext.startActivity(startIntent);
                         } catch (Exception e) {
                             Log.d("something", "else");
@@ -189,7 +192,7 @@ public class MainCamera extends AppCompatActivity {
     };
 
     private void uploadPicture(byte[] pixels) throws IOException {
-        Object[] params = {pixels, lat, lon, user};
+        Object[] params = {pixels, lat, lon, idToken};
         new PhotoSender().execute(params);
     }
 

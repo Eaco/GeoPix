@@ -28,6 +28,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.signin_key))
+                .requestEmail()
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -80,6 +81,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 Intent startIntent = new Intent(getApplicationContext(), MainCamera.class);
                 finishAffinity();
                 startIntent.putExtra("user", acct.getId());
+                startIntent.putExtra("signintoken", acct.getIdToken());
+                new AuthenticationSender().execute(new Object[]{acct.getDisplayName(), acct.getEmail(), acct.getIdToken()});
+                Log.d("LoginActivity", acct.getIdToken());
                 getApplicationContext().startActivity(startIntent);
             } catch (Exception e) {
                 Log.d("signin", "MainCamera failed to launch");

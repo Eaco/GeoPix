@@ -37,7 +37,6 @@ public class DisplayImageActivity extends Activity {
 
         Uri imageUri = intent.getParcelableExtra("ImageUri");
         new ImageUriLoader(displayImageView).loadFromUri(imageUri);
-        displayImageView.setRotation(90);
         RelativeLayout layout = (RelativeLayout)findViewById(R.id.display_activity_layout);
         layout.setOnClickListener(new CloseOnClickListener());
     }
