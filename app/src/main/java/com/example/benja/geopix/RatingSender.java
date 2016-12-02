@@ -66,7 +66,7 @@ public class RatingSender extends AsyncTask {
 
             String response = stringBuilder.toString();
 
-            Log.d("PhotoSender Http Response", response);
+            Log.d("RatingSender", response);
 
             responseStream.close();
             urlConn.disconnect();

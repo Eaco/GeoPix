@@ -173,10 +173,7 @@ public class MainCamera extends AppCompatActivity {
                 getLocation();
                 uploadPicture(data);
                 Log.d("LocationManager", "lat: " + lat + ", lon: " + lon);
-//                FileOutputStream fos = new FileOutputStream(pictureFile);
-//                fos.write(data);
-//                fos.flush();
-//                fos.close();
+
             } catch (FileNotFoundException e) {
                 Log.d("cam", "File not found: " + e.getMessage());
             } catch (IOException e) {
@@ -277,8 +274,6 @@ public class MainCamera extends AppCompatActivity {
     private static File getOutputMediaFile(int type) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
-
-//        File mediaStorageDir = new File(Environment.DIRECTORY_PICTURES, "MyCameraApp");
 
         final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                 .getAbsolutePath(), "/MyCameraApp");

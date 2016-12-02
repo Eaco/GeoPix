@@ -24,11 +24,9 @@ public class ImageUriLoader {
     }
 
     public void loadFromUri(Uri loadFrom){
-        Log.d("MARKOTAG", "Loading from Uri now!");
         if(loadFrom == null){
             return;
         }
-        Log.d("MARKOTAG", "Uri is: " + loadFrom.toString());
         if(loadFrom.getScheme() != null && loadFrom.getScheme().equals("android.resource")){
             mImageView.setImageURI(loadFrom);
         } else {

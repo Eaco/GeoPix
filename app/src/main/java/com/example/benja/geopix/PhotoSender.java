@@ -51,7 +51,6 @@ public class PhotoSender extends AsyncTask {
             httpUrlConnection.setRequestMethod("POST");
             httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
             httpUrlConnection.setRequestProperty("Content-Type", "application/json");
-//            httpUrlConnection.setRequestProperty("Host", "android.schoolportal.gr");
             httpUrlConnection.connect();
 
             JSONObject jsonParam = new JSONObject();
@@ -115,9 +114,6 @@ public class PhotoSender extends AsyncTask {
 
 
             OutputStream os = httpUrlConnection.getOutputStream();
-
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
 
             bm.compress(Bitmap.CompressFormat.JPEG, 100, os);
             os.flush();

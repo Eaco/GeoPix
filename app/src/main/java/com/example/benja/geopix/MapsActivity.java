@@ -170,7 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 responseStream.close();
                 httpUrlConnection.disconnect();
 
-                Log.d("PhotoSender Http Response", response);
+                Log.d("PhotoSender", response);
 
                 return jsonArray;
             } catch (MalformedURLException e) {

@@ -35,7 +35,6 @@ public class    AuthenticationSender extends AsyncTask {
             httpUrlConnection.setRequestMethod("POST");
             httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
             httpUrlConnection.setRequestProperty("Content-Type", "application/json");
-//            httpUrlConnection.setRequestProperty("Host", "android.schoolportal.gr");
             httpUrlConnection.connect();
 
             JSONObject jsonParam = new JSONObject();
@@ -68,7 +67,7 @@ public class    AuthenticationSender extends AsyncTask {
 
             String response = stringBuilder.toString();
 
-            Log.d("AuthenticationSender Http Response", response);
+            Log.d("AuthenticationSender", response);
 
             responseStream.close();
 

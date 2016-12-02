@@ -89,7 +89,6 @@ public class DisplayImageActivity extends Activity {
                 httpUrlConnection.setRequestMethod("GET");
                 httpUrlConnection.setRequestProperty("Connection", "Keep-Alive");
                 httpUrlConnection.setRequestProperty("Content-Type", "application/json");
-//                httpUrlConnection.setRequestProperty("Host", "android.schoolportal.gr");
                 httpUrlConnection.connect();
 
                 InputStream responseStream = new
