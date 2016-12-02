@@ -31,8 +31,10 @@ public class RatingSender extends AsyncTask {
 //            URL url = new URL("http://192.168.42.127:3002/ratings/params[1]");
             URL url = new URL("http://geopix-bengineering.rhcloud.com/ratings/" + params[1]);
 
-
             urlConn = (HttpURLConnection) url.openConnection();
+            String basicAuth = "Bearer: " + params[2];
+            urlConn.setRequestProperty("Authorization", basicAuth);
+
             urlConn.setUseCaches(false);
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod("POST");

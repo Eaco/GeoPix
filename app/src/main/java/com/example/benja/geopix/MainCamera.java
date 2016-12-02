@@ -37,9 +37,7 @@ public class MainCamera extends AppCompatActivity {
     PixLocationListener locationListener;
     private double lat;
     private double lon;
-    private GoogleApiClient client;
     private boolean selfieCam = false;
-    private String user;
     private String idToken;
 
     @Override
@@ -50,7 +48,6 @@ public class MainCamera extends AppCompatActivity {
             return;
         }
         Intent intent = getIntent();
-        user = intent.getStringExtra("user");
         idToken = intent.getStringExtra("signintoken");
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, new PixLocationListener());
         //Remove title bar and initialize view
@@ -171,7 +168,6 @@ public class MainCamera extends AppCompatActivity {
                 Log.d("cam", "Error creating media file, check storage permissions: ");
                 return;
             }
-
             try {
                 //TODO make this async
                 getLocation();
@@ -203,15 +199,14 @@ public class MainCamera extends AppCompatActivity {
 
         Criteria criteria = new Criteria();
         String bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+        locationManager.requestLocationUpdates(bestProvider, 1000, 0, locationListener);
 
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         if (location != null) {
             lat = location.getLatitude();
             lon = location.getLongitude();
-        } else {
-            locationManager.requestLocationUpdates(bestProvider, 1000, 0, locationListener);
-        }
+        } 
     }
 
 

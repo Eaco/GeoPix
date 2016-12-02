@@ -51,10 +51,6 @@ public class    AuthenticationSender extends AsyncTask {
             out.flush();
             out.close();
 
-
-
-
-
             InputStream responseStream = new
                     BufferedInputStream(httpUrlConnection.getInputStream());
 

@@ -103,6 +103,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         mMap.setOnMarkerClickListener(new PhotoMarkerClickListener());
+        mMap.setMyLocationEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lon), 15));
         // Add a marker in Sydney and move the camera
 
@@ -119,7 +120,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("MARKOTAG", "SOMEONE CLICKED ON A MARKER! THE MESSAGE IS: " + marker.getTitle());
             Intent startIntent = new Intent(mContext, DisplayImageActivity.class);
             startIntent.putExtra("imageId", marker.getTitle());
-            startIntent.putExtra("ImageUri", Uri.parse("https://geopix-bengineering.rhcloud.com/images/" + marker.getTitle()));
+            startIntent.putExtra("imageUri", Uri.parse("https://geopix-bengineering.rhcloud.com/images/" + marker.getTitle()));
+            startIntent.putExtra("idToken", idToken);
+
 //            startIntent.putExtra("ImageUri", Uri.parse("http://192.168.42.127:3002/images/" + marker.getTitle()));
 //            startIntent.putExtra("uniqueID", marker.getTitle());
             mContext.startActivity(startIntent);
@@ -185,20 +188,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         protected void onPostExecute(JSONArray images) {
             try {
-                for (int i = 0; i < images.length(); i++) {
-                    JSONObject j = images.getJSONObject(i);
-                    JSONObject loc = j.getJSONObject("location");
+                if(images != null) {
+                    for (int i = 0; i < images.length(); i++) {
+                        JSONObject j = images.getJSONObject(i);
+                        JSONObject loc = j.getJSONObject("location");
 
-                    JSONArray coordArray = (JSONArray) loc.get("coordinates");
+                        JSONArray coordArray = (JSONArray) loc.get("coordinates");
 
-                    LatLng coords = new LatLng(Double.parseDouble(coordArray.getString(0)), Double.parseDouble(coordArray.getString(1)));
-                    String id = j.getString("_id");
+                        LatLng coords = new LatLng(Double.parseDouble(coordArray.getString(0)), Double.parseDouble(coordArray.getString(1)));
+                        String id = j.getString("_id");
 
-                    if (j.getInt("rating") >= minRate){
-                        makeMarker(coords, id);
+                        if (j.getInt("rating") >= minRate) {
+                            makeMarker(coords, id);
+                        }
+
+                        Log.d("photofetcher", coordArray.get(0) + " " + coordArray.get(1));
                     }
-
-                    Log.d("photofetcher", coordArray.get(0) + " " + coordArray.get(1));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

@@ -37,7 +37,7 @@ public class PhotoSender extends AsyncTask {
             String twoHyphens = "--";
             String boundary = "*****";
 
-            HttpURLConnection httpUrlConnection = null;
+            HttpURLConnection httpUrlConnection;
 
 //            URL url = new URL("http://192.168.42.127:3002/images");
             URL url = new URL("http://geopix-bengineering.rhcloud.com/images");
